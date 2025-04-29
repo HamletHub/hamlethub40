@@ -1,5 +1,6 @@
 import { Post } from "@/interfaces/post";
 import { getDatabase } from "./mongodb";
+import { getTownSlugFromHubId } from "./hubs";
 
 // Interface for MongoDB assets
 interface AssetPost {
@@ -31,6 +32,8 @@ function mapAssetToPost(asset: AssetPost): Post {
     excerpt: asset.metaDescription || '',
     ogImage: { url: asset.imageUrl || '' },
     content: asset.description || '',
+    hubId: asset.hubId || '',
+    townSlug: getTownSlugFromHubId(asset.hubId) || '',
   };
 }
 
@@ -57,7 +60,7 @@ const withTimeout = <T>(promise: Promise<T>, timeoutMs: number): Promise<T> => {
 export async function getPostBySlug(slug: string): Promise<Post | null> {
   try {
     console.log(`Fetching post with slug: ${slug}`);
-    const db = await withTimeout(getDatabase(), 8000);
+    const db = await withTimeout(getDatabase(), 15000);
     
     // Only select the fields we need to improve performance
     const projection = {
@@ -66,7 +69,8 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
       publishAt: 1,
       imageUrl: 1,
       metaDescription: 1,
-      description: 1
+      description: 1,
+      hubId: 1
     };
     
     const asset = await withTimeout(
@@ -75,7 +79,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
         type: "story",
         state: "published"
       }, { projection }),
-      15000  // Increased from 5000ms to 15000ms (15 seconds)
+      30000
     ) as AssetPost | null;
 
     if (!asset) {
@@ -94,7 +98,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 export async function getAllPosts(): Promise<Post[]> {
   try {
     console.log('Fetching all posts');
-    const db = await withTimeout(getDatabase(), 8000);
+    const db = await withTimeout(getDatabase(), 15000);
     
     // Only select the fields we need
     const projection = {
@@ -102,7 +106,8 @@ export async function getAllPosts(): Promise<Post[]> {
       title: 1,
       publishAt: 1,
       imageUrl: 1,
-      metaDescription: 1
+      metaDescription: 1,
+      hubId: 1
     };
     
     const assets = await withTimeout(
@@ -111,9 +116,9 @@ export async function getAllPosts(): Promise<Post[]> {
         state: "published"
       }, { projection })
       .sort({ publishAt: -1 })
-      .limit(10) // Reduced limit to prevent timeouts
+      .limit(10)
       .toArray(),
-      15000 // Increased timeout
+      30000
     ) as AssetPost[];
 
     console.log(`Found ${assets.length} posts`);

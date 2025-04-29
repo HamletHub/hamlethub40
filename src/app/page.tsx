@@ -4,6 +4,7 @@ import { Intro } from "@/app/_components/intro";
 import { MoreStories } from "@/app/_components/more-stories";
 import { getDatabase } from "@/lib/mongodb";
 import { Post } from "@/interfaces/post";
+import { getTownSlugFromHubId } from "@/lib/hubs";
 
 // Define type for MongoDB assets
 interface AssetPost {
@@ -44,6 +45,8 @@ export default async function Index() {
       excerpt: post.metaDescription || '',
       ogImage: { url: post.imageUrl || '' },
       content: post.description || '',
+      hubId: post.hubId || '',
+      townSlug: getTownSlugFromHubId(post.hubId) || '',
     })) as Post[];
 
     const heroPost = allPosts[0];
@@ -61,6 +64,7 @@ export default async function Index() {
               author={heroPost.author}
               slug={heroPost.slug}
               excerpt={heroPost.excerpt}
+              townSlug={heroPost.townSlug}
             />
           )}
           {morePosts.length > 0 && <MoreStories posts={morePosts} />}

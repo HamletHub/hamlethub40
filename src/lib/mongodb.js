@@ -31,3 +31,9 @@ export async function getDatabase() {
   const client = await clientPromise;
   return client.db();  // Connects to the database specified in your URI
 }
+
+// Add getCollection function
+export async function getCollection(collectionName) {
+  const db = await getDatabase();
+  return db.collection(collectionName);
+}

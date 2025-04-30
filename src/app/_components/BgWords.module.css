@@ -1,0 +1,29 @@
+.bgContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bgWord {
+  font-size: 8.375rem;
+  opacity: 0.2;
+  line-height: 0.5;
+  font-weight: 800;
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+  transform: translateX(var(--offset, 0));
+  text-align: left;
+}
+
+.bgWord:nth-child(odd) {
+  --offset: 0;
+}
+
+.bgWord:nth-child(even) {
+  --offset: 0;
+} 

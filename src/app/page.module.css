@@ -1,0 +1,26 @@
+.wrapper {
+  background: #fff;
+  position: relative;
+  z-index: 1;
+}
+
+.heading {
+  font-size: 2.25rem; /* text-4xl */
+  font-weight: 500; /* font-medium */
+  line-height: 1.25; /* leading-tight */
+  color: var(--color-green-dark);
+  font-family: var(--font-vollkorn), serif;
+}
+
+@media (min-width: 768px) {
+  .heading {
+    font-size: 3rem; /* md:text-5xl */
+  }
+}
+
+/* Keeping the commented version as reference */
+/* 
+.wrapper {
+  background: white url('../../public/town.png') bottom 50px right 50% repeat-x;
+}
+*/ 

@@ -20,6 +20,13 @@ const config: Config = {
         "accent-7": "#333",
         success: "#0070f3",
         cyan: "#79FFE1",
+        "green-dark": "var(--color-green-dark)",
+        "green-medium": "var(--color-green-medium)",
+        "green-light": "var(--color-green-light)",
+        "green": "var(--color-green)",
+      },
+      fontFamily: {
+        vollkorn: "var(--font-vollkorn), serif",
       },
       spacing: {
         28: "7rem",

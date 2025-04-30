@@ -1,3 +1,69 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Global styles */
+:root {
+  --color-black: #333333;
+  --color-grey: #DEDEDE;
+  --color-dark-grey: #777777;
+  --color-light-grey: #f8f8f8;
+  --color-divider: rgba(0, 0, 0, 0.12);
+  --color-white: #ffffff;
+  --color-green: #02B197;
+  --color-green-dark: #329998;
+  --color-green-light: #DBEFEC;
+  --color-green-background: #A6D7D0;
+  --color-white-green: #FCFDFB;
+  --color-light-green: #E6EEDD;
+  --color-red: #f44336;
+  --color-blue: #2196f3;
+}
+
+@layer components {
+  .text-main {
+    color: var(--color-green);
+  }
+
+  .text-weak-green {
+    color: var(--color-green-light);
+  }
+
+  /* Font for background words */
+  .vollkorn {
+    font-family: var(--font-vollkorn), serif;
+  }
+
+  /* Logo sizing */
+  .logo-img {
+    height: auto;
+    width: 180px;
+  }
+  
+  /* Apply background to enable proper reading of content */
+  .min-vh-100 {
+    min-height: 100vh;
+  }
+  
+  /* Adjusted from Bootstrap overrides */
+  .py-lg-6 {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+}
+
+/* Custom z-index utilities (keeping these separate to avoid conflicts) */
+.z-0 {
+  z-index: 0;
+}
+
+.z-2 {
+  z-index: 2;
+}
+
+@media (max-width: 992px) {
+  .py-lg-6 {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+}

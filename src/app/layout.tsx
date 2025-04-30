@@ -4,6 +4,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import cn from "classnames";
 import { ThemeSwitcher } from "./_components/theme-switcher";
+import { Vollkorn } from 'next/font/google';
+
 
 import "./globals.css";
 
@@ -17,13 +19,21 @@ export const metadata: Metadata = {
   },
 };
 
+const vollkorn = Vollkorn({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'], // Add weights you need
+  variable: '--font-vollkorn', // This creates a CSS variable
+  display: 'swap',
+});
+
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={vollkorn.variable}>
       <head>
         <link
           rel="apple-touch-icon"

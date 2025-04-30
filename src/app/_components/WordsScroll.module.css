@@ -1,0 +1,72 @@
+.scroller {
+  top: 18px;
+  display: inline-block;
+  height: 73px;
+  width: 100%;
+  max-width: 190px;
+  text-align: left;
+  line-height: inherit;
+  position: relative;
+  overflow: hidden;
+}
+
+.scrollText {
+  color: var(--color-green-dark);
+  font-family: var(--font-vollkorn), serif;
+  font-weight: 500;
+}
+
+@media (max-width: 1354px) {
+  .scroller {
+    height: 60px;
+    max-width: 155px;
+  }
+}
+
+@media (max-width: 768px) {
+  .scroller {
+    margin-top: -10px;
+    height: 47px;
+    max-width: 110px;
+  }
+}
+
+@media (max-width: 542px) {
+  .scroller {
+    max-width: 104px;
+  }
+}
+
+@media (max-width: 400px) {
+  .scroller {
+    height: 38px;
+    max-width: 80px;
+    margin-top: -5px;
+  }
+}
+
+@media (max-width: 350px) {
+  .scroller {
+    height: 33px;
+    max-width: 80px;
+    margin-top: -5px;
+  }
+}
+
+.scroller > span {
+  position: absolute;
+  top: 0;
+  animation: slide 6s infinite;
+}
+
+@keyframes slide {
+  0% {
+    top: 0;
+  }
+  33% {
+    top: -1.2em;
+  }
+  66% {
+    top: -2.4em;
+  }
+} 

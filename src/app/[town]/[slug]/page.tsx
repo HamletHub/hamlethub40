@@ -1,107 +1,165 @@
+// @ts-ignore
 import { Metadata } from "next";
+// @ts-ignore
 import { notFound } from "next/navigation";
-import { getAllPosts, getPostBySlug } from "@/lib/api";
-import { CMS_NAME } from "@/lib/constants";
-import markdownToHtml from "@/lib/markdownToHtml";
-import { getHubIdFromTownSlug } from "@/lib/hubs";
-import Alert from "@/app/_components/alert";
+import { getDatabase } from "@/lib/mongodb";
 import Container from "@/app/_components/container";
-import Header from "@/app/_components/header";
-import { PostBody } from "@/app/_components/post-body";
 import { PostHeader } from "@/app/_components/post-header";
+import { PostBody } from "@/app/_components/post-body";
 
-export default async function TownPost(props: Params) {
-  try {
-    const params = await props.params;
-    const post = await getPostBySlug(params.slug);
-
-    // Verify that the post belongs to the correct town
-    if (!post || post.townSlug !== params.town) {
-      return notFound();
-    }
-
-    const content = await markdownToHtml(post.content || "");
-
-    return (
-      <main>
-        <Alert preview={post.preview} />
-        <Container>
-          <Header />
-          <article className="mb-32">
-            <PostHeader
-              title={post.title}
-              coverImage={post.coverImage}
-              date={post.date}
-              author={post.author}
-            />
-            <PostBody content={content} />
-          </article>
-        </Container>
-      </main>
-    );
-  } catch (error) {
-    console.error("Error rendering post:", error);
-    return (
-      <main>
-        <Container>
-          <Header />
-          <div className="py-10">
-            <h1 className="text-2xl font-bold mb-4">Error Loading Post</h1>
-            <p>Sorry, we couldn't load this post. Please try again later.</p>
-          </div>
-        </Container>
-      </main>
-    );
-  }
+// Define type for MongoDB assets/posts
+interface AssetPost {
+  _id: string;
+  hubId: any;
+  title: string;
+  alias: string;
+  description: string;
+  type: string;
+  status: string;
+  state: string;
+  publishAt: string;
+  imageUrl: string;
+  metaDescription: string;
 }
 
-type Params = {
+// Define type for MongoDB hubs
+interface Hub {
+  _id: string;
+  name: string;
+  alias: string;
+  state: string;
+}
+
+// Define params type for Next.js 15
+interface PageParams {
   params: Promise<{
     town: string;
     slug: string;
   }>;
-};
+}
 
-export async function generateMetadata(props: Params): Promise<Metadata> {
+export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
   try {
-    const params = await props.params;
-    const post = await getPostBySlug(params.slug);
+    // Await params before accessing properties
+    const resolvedParams = await params;
+    const { town, slug } = resolvedParams;
 
-    if (!post || post.townSlug !== params.town) {
+    const db = await getDatabase();
+
+    // First verify the town exists
+    const hub = await db.collection("hubs").findOne({ alias: town }) as Hub;
+    if (!hub) {
       return {
-        title: "Post Not Found",
+        title: "Town Not Found | HamletHub",
+        description: "The requested town could not be found."
+      };
+    }
+
+    // Then find the post
+    const post = await db.collection('assets').findOne({
+      alias: slug,
+      type: "story",
+      state: "published",
+      $expr: { 
+        $eq: [
+          { $toString: "$hubId" }, 
+          { $toString: hub._id }
+        ]
+      }
+    }) as AssetPost;
+
+    if (!post) {
+      return {
+        title: "Post Not Found | HamletHub",
         description: "The requested post could not be found."
       };
     }
 
-    // Include town name in the title
-    const title = `${post.title} | ${params.town.replace(/-/g, ' ')} | ${CMS_NAME}`;
-
     return {
-      title,
+      title: `${post.title} | ${hub.name} | HamletHub`,
+      description: post.metaDescription || `${post.title} - Latest from ${hub.name}`,
       openGraph: {
-        title,
-        images: [post.ogImage.url],
+        title: post.title,
+        description: post.metaDescription || "",
+        images: post.imageUrl ? [{ url: post.imageUrl }] : [],
       },
     };
   } catch (error) {
     console.error("Error generating metadata:", error);
     return {
-      title: "Post - Error",
+      title: "Error | HamletHub",
+      description: "An error occurred",
     };
   }
 }
 
-export async function generateStaticParams() {
+export default async function StoryPage({ params }: PageParams) {
   try {
-    const posts = await getAllPosts();
+    // Await params before accessing properties
+    const resolvedParams = await params;
+    const { town, slug } = resolvedParams;
 
-    return posts.map((post) => ({
-      town: post.townSlug,
-      slug: post.slug,
-    }));
+    const db = await getDatabase();
+
+    // First verify the town exists
+    const hub = await db.collection("hubs").findOne({ alias: town }) as Hub;
+    if (!hub) {
+      console.error(`No hub found with alias: ${town}`);
+      return notFound();
+    }
+
+    // Then find the post
+    const post = await db.collection('assets').findOne({
+      alias: slug,
+      type: "story",
+      state: "published",
+      $expr: { 
+        $eq: [
+          { $toString: "$hubId" }, 
+          { $toString: hub._id }
+        ]
+      }
+    }) as AssetPost;
+
+    if (!post) {
+      console.error(`No post found with slug: ${slug} in town: ${town}`);
+      return notFound();
+    }
+
+    const formattedPost = {
+      title: post.title || '',
+      coverImage: post.imageUrl || '',
+      date: post.publishAt ? new Date(post.publishAt).toISOString() : '',
+      author: { name: 'HamletHub', picture: '' },
+      content: post.description || ''
+    };
+
+    return (
+      <main>
+        <Container>
+          <article className="mb-32">
+            <PostHeader
+              title={formattedPost.title}
+              coverImage={formattedPost.coverImage}
+              date={formattedPost.date}
+              author={formattedPost.author}
+            />
+            <PostBody content={formattedPost.content} />
+          </article>
+        </Container>
+      </main>
+    );
   } catch (error) {
-    console.error("Error generating static params:", error);
-    return [];
+    console.error("Error rendering story:", error);
+    return (
+      <main>
+        <Container>
+          <div className="py-10">
+            <h1 className="text-2xl font-bold mb-4">Error Loading Story</h1>
+            <p>Sorry, we couldn't load this story. Please try again later.</p>
+          </div>
+        </Container>
+      </main>
+    );
   }
 } 

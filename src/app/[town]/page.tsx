@@ -118,6 +118,8 @@ export default async function TownPage({ params }: PageParams) {
       excerpt: post.metaDescription || '',
       ogImage: { url: post.imageUrl || '' },
       content: post.description || '',
+      hubId: post.hubId ? post.hubId.toString() : '',
+      townSlug: townSlug
     })) as Post[];
 
     return (

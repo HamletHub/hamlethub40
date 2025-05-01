@@ -6,6 +6,7 @@ import { getDatabase } from "@/lib/mongodb";
 import Container from "@/app/_components/container";
 import { PostHeader } from "@/app/_components/post-header";
 import { PostBody } from "@/app/_components/post-body";
+import TownHeader from "@/app/_components/TownHeader";
 
 // Define type for MongoDB assets/posts
 interface AssetPost {
@@ -25,7 +26,7 @@ interface AssetPost {
 // Define type for MongoDB hubs
 interface Hub {
   _id: string;
-  name: string;
+  title: string;
   alias: string;
   state: string;
 }
@@ -76,8 +77,8 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
     }
 
     return {
-      title: `${post.title} | ${hub.name} | HamletHub`,
-      description: post.metaDescription || `${post.title} - Latest from ${hub.name}`,
+      title: `${post.title} | ${hub.title} | HamletHub`,
+      description: post.metaDescription || `${post.title} - Latest from ${hub.title}`,
       openGraph: {
         title: post.title,
         description: post.metaDescription || "",
@@ -137,6 +138,7 @@ export default async function StoryPage({ params }: PageParams) {
     return (
       <main>
         <Container>
+          <TownHeader hubTitle={hub.title} />
           <article className="mb-32">
             <PostHeader
               title={formattedPost.title}
@@ -154,6 +156,7 @@ export default async function StoryPage({ params }: PageParams) {
     return (
       <main>
         <Container>
+          <TownHeader hubTitle="Story" />
           <div className="py-10">
             <h1 className="text-2xl font-bold mb-4">Error Loading Story</h1>
             <p>Sorry, we couldn't load this story. Please try again later.</p>

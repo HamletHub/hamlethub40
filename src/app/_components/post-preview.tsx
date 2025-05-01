@@ -4,11 +4,48 @@ import Avatar from "./avatar";
 import CoverImage from "./cover-image";
 import DateFormatter from "./date-formatter";
 
+// Function to truncate text to a specific length without cutting off words
+const truncateText = (text: string | undefined, maxLength: number): string => {
+  // Handle undefined or empty text
+  if (!text || text.length === 0) return '';
+  
+  // First remove HTML tags
+  let plainText = text.replace(/<[^>]*>/g, '');
+  
+  // Decode common HTML entities
+  plainText = plainText
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&mdash;/g, '-')
+    .replace(/&ndash;/g, '-')
+    .replace(/&hellip;/g, '...')
+    .replace(/&rsquo;/g, "'")
+    .replace(/&lsquo;/g, "'")
+    .replace(/&rdquo;/g, '"')
+    .replace(/&ldquo;/g, '"');
+  
+  if (plainText.length <= maxLength) return plainText;
+  
+  // Find the last space before maxLength
+  const lastSpaceIndex = plainText.substring(0, maxLength).lastIndexOf(' ');
+  
+  // If no space found, cut at maxLength
+  if (lastSpaceIndex === -1) return plainText.substring(0, maxLength) + '...';
+  
+  // Cut at the last space and add ellipsis
+  return plainText.substring(0, lastSpaceIndex) + '...';
+};
+
 type Props = {
   title: string;
   coverImage: string;
   date: string;
   excerpt: string;
+  content?: string;
   author: Author;
   slug: string;
   townSlug: string;
@@ -19,6 +56,7 @@ export function PostPreview({
   coverImage,
   date,
   excerpt,
+  content,
   author,
   slug,
   townSlug,
@@ -36,7 +74,9 @@ export function PostPreview({
       <div className="text-lg mb-4">
         <DateFormatter dateString={date} />
       </div>
-      <p className="text-lg leading-relaxed mb-4">{excerpt}</p>
+      <p className="text-lg leading-relaxed mb-4">
+        {truncateText(content || excerpt, 160)}
+      </p>
       {/* <Avatar name={author.name} picture={author.picture} /> */}
     </div>
   );

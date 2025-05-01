@@ -14,6 +14,9 @@ importers:
       '@types/bcryptjs':
         specifier: ^3.0.0
         version: 3.0.0
+      '@types/uuid':
+        specifier: ^10.0.0
+        version: 10.0.0
       bcryptjs:
         specifier: ^3.0.2
         version: 3.0.2
@@ -44,6 +47,9 @@ importers:
       react-dom:
         specifier: 19.0.0-rc-02c0e824-20241028
         version: 19.0.0-rc-02c0e824-20241028(react@19.0.0-rc-02c0e824-20241028)
+      react-image-crop:
+        specifier: ^11.0.10
+        version: 11.0.10(react@19.0.0-rc-02c0e824-20241028)
       remark:
         specifier: ^15.0.1
         version: 15.0.1
@@ -379,6 +385,9 @@ packages:
 
   '@types/unist@3.0.3':
     resolution: {integrity: sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==}
+
+  '@types/uuid@10.0.0':
+    resolution: {integrity: sha512-7gqG38EyHgyP1S+7+xomFtL+ZNHcKv6DwNaCZmJmo1vgMugyF3TCnXVg4t1uk89mLNwnLtnY3TpOpCOyp1/xHQ==}
 
   '@types/webidl-conversions@7.0.3':
     resolution: {integrity: sha512-CiJJvcRtIgzadHCYXw7dqEnMNRjhGZlYK05Mj9OyktqV8uVT8fD2BFOB7S1uwBE3Kj2Z+4UyPmFw/Ixgw/LAlA==}
@@ -1224,6 +1233,11 @@ packages:
     peerDependencies:
       react: 19.0.0-rc-02c0e824-20241028
 
+  react-image-crop@11.0.10:
+    resolution: {integrity: sha512-+5FfDXUgYLLqBh1Y/uQhIycpHCbXkI50a+nbfkB1C0xXXUTwkisHDo2QCB1SQJyHCqIuia4FeyReqXuMDKWQTQ==}
+    peerDependencies:
+      react: '>=16.13.1'
+
   react@19.0.0-rc-02c0e824-20241028:
     resolution: {integrity: sha512-GbZ7hpPHQMiEu53BqEaPQVM/4GG4hARo+mqEEnx4rYporDvNvUjutiAFxYFSbu6sgHwcr7LeFv8htEOwALVA2A==}
     engines: {node: '>=0.10.0'}
@@ -1799,6 +1813,8 @@ snapshots:
   '@types/tough-cookie@4.0.5': {}
 
   '@types/unist@3.0.3': {}
+
+  '@types/uuid@10.0.0': {}
 
   '@types/webidl-conversions@7.0.3': {}
 
@@ -2709,6 +2725,10 @@ snapshots:
     dependencies:
       react: 19.0.0-rc-02c0e824-20241028
       scheduler: 0.25.0-rc-02c0e824-20241028
+
+  react-image-crop@11.0.10(react@19.0.0-rc-02c0e824-20241028):
+    dependencies:
+      react: 19.0.0-rc-02c0e824-20241028
 
   react@19.0.0-rc-02c0e824-20241028: {}
 

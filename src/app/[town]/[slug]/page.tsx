@@ -7,6 +7,7 @@ import Container from "@/app/_components/container";
 import { PostHeader } from "@/app/_components/post-header";
 import { PostBody } from "@/app/_components/post-body";
 import TownHeader from "@/app/_components/TownHeader";
+import { convertToGcsUrl } from "@/lib/imageUtils";
 
 // Define type for MongoDB assets/posts
 interface AssetPost {
@@ -76,13 +77,16 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
       };
     }
 
+    // Convert image URL for Open Graph
+    const imageUrl = post.imageUrl ? convertToGcsUrl(post.imageUrl, "original") : '';
+
     return {
       title: `${post.title} | ${hub.title} | HamletHub`,
       description: post.metaDescription || `${post.title} - Latest from ${hub.title}`,
       openGraph: {
         title: post.title,
         description: post.metaDescription || "",
-        images: post.imageUrl ? [{ url: post.imageUrl }] : [],
+        images: imageUrl ? [{ url: imageUrl }] : [],
       },
     };
   } catch (error) {
@@ -127,9 +131,12 @@ export default async function StoryPage({ params }: PageParams) {
       return notFound();
     }
 
+    // Convert image URL to use original subfolder
+    const imageUrl = post.imageUrl ? convertToGcsUrl(post.imageUrl, "original") : '';
+
     const formattedPost = {
       title: post.title || '',
-      coverImage: post.imageUrl || '',
+      coverImage: imageUrl,
       date: post.publishAt ? new Date(post.publishAt).toISOString() : '',
       author: { name: 'HamletHub', picture: '' },
       content: post.description || ''
@@ -145,8 +152,12 @@ export default async function StoryPage({ params }: PageParams) {
               coverImage={formattedPost.coverImage}
               date={formattedPost.date}
               author={formattedPost.author}
+              imageSubfolder="original"
             />
-            <PostBody content={formattedPost.content} />
+            <PostBody 
+              content={formattedPost.content} 
+              imageSubfolder="original" 
+            />
           </article>
         </Container>
       </main>

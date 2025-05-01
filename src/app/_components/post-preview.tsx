@@ -49,6 +49,7 @@ type Props = {
   author: Author;
   slug: string;
   townSlug: string;
+  imageSubfolder?: string;
 };
 
 export function PostPreview({
@@ -60,11 +61,18 @@ export function PostPreview({
   author,
   slug,
   townSlug,
+  imageSubfolder,
 }: Props) {
   return (
     <div>
       <div className="mb-5">
-        <CoverImage slug={slug} title={title} src={coverImage} townSlug={townSlug} />
+        <CoverImage 
+          slug={slug} 
+          title={title} 
+          src={coverImage} 
+          townSlug={townSlug} 
+          imageSubfolder={imageSubfolder}
+        />
       </div>
       <h3 className="text-3xl mb-3 leading-snug">
         <Link href={`/${townSlug}/${slug}`} className="hover:underline">

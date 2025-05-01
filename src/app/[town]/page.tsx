@@ -3,6 +3,7 @@ import { MoreStories } from "@/app/_components/more-stories";
 import TownHeader from "@/app/_components/TownHeader";
 import { getDatabase } from "@/lib/mongodb";
 import { Post } from "@/interfaces/post";
+import { convertToGcsUrl } from "@/lib/imageUtils";
 // @ts-ignore
 import { notFound } from "next/navigation";
 
@@ -109,15 +110,15 @@ export default async function TownPage({ params }: PageParams) {
     
     console.log(`Found ${assetPosts.length} stories for ${hub.title}`);
     
-    // Map to required format
+    // Map to required format with 1_1 subfolder for town page images
     const allPosts = assetPosts.map((post: AssetPost) => ({
       slug: post.alias || '',
       title: post.title || '',
       date: post.publishAt ? new Date(post.publishAt).toISOString() : '',
-      coverImage: post.imageUrl || '',
+      coverImage: post.imageUrl ? convertToGcsUrl(post.imageUrl, "1_1") : '',
       author: { name: 'HamletHub', picture: '' },
       excerpt: post.metaDescription || '',
-      ogImage: { url: post.imageUrl || '' },
+      ogImage: { url: post.imageUrl ? convertToGcsUrl(post.imageUrl, "1_1") : '' },
       content: post.description || '',
       hubId: post.hubId ? post.hubId.toString() : '',
       townSlug: townSlug
@@ -134,7 +135,7 @@ export default async function TownPage({ params }: PageParams) {
               </h2>
 
               {allPosts.length > 0 ? (
-                <MoreStories posts={allPosts} />
+                <MoreStories posts={allPosts} imageSubfolder="1_1" />
               ) : (
                 <p>No stories found for {hub.title}.</p>
               )}

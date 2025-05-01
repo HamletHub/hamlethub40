@@ -1,18 +1,23 @@
 import cn from "classnames";
 import Link from "next/link";
 import Image from "next/image";
+import { convertToGcsUrl } from "@/lib/imageUtils";
 
 type Props = {
   title: string;
   src: string;
   slug?: string;
   townSlug?: string;
+  imageSubfolder?: string;
 };
 
-const CoverImage = ({ title, src, slug, townSlug }: Props) => {
+const CoverImage = ({ title, src, slug, townSlug, imageSubfolder }: Props) => {
+  // Convert S3 URL to GCS URL with specified subfolder
+  const imageUrl = convertToGcsUrl(src, imageSubfolder);
+  
   const image = (
     <Image
-      src={src}
+      src={imageUrl}
       alt={`Cover Image for ${title}`}
       className={cn("shadow-sm w-full", {
         "hover:shadow-lg transition-shadow duration-200": slug,

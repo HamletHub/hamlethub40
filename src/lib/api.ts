@@ -1,6 +1,7 @@
 import { Post } from "@/interfaces/post";
 import { getDatabase } from "./mongodb";
 import { getTownSlugFromHubId } from "./hubs";
+import { convertToGcsUrl } from "./imageUtils";
 
 // Interface for MongoDB assets
 interface AssetPost {
@@ -22,15 +23,18 @@ interface AssetPost {
 }
 
 // Map MongoDB asset to Post interface
-function mapAssetToPost(asset: AssetPost): Post {
+function mapAssetToPost(asset: AssetPost, imageSubfolder?: string): Post {
+  // Convert S3 image URLs to GCS URLs with specified subfolder
+  const imageUrl = asset.imageUrl ? convertToGcsUrl(asset.imageUrl, imageSubfolder) : '';
+  
   return {
     slug: asset.alias || '',
     title: asset.title || '',
     date: asset.publishAt ? new Date(asset.publishAt).toISOString() : '',
-    coverImage: asset.imageUrl || '',
+    coverImage: imageUrl,
     author: { name: 'HamletHub', picture: '' },
     excerpt: asset.metaDescription || '',
-    ogImage: { url: asset.imageUrl || '' },
+    ogImage: { url: imageUrl },
     content: asset.description || '',
     hubId: asset.hubId || '',
     townSlug: getTownSlugFromHubId(asset.hubId) || '',
@@ -57,7 +61,7 @@ const withTimeout = <T>(promise: Promise<T>, timeoutMs: number): Promise<T> => {
   });
 };
 
-export async function getPostBySlug(slug: string): Promise<Post | null> {
+export async function getPostBySlug(slug: string, imageSubfolder?: string): Promise<Post | null> {
   try {
     console.log(`Fetching post with slug: ${slug}`);
     const db = await withTimeout(getDatabase(), 15000);
@@ -88,14 +92,14 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
     }
     
     console.log(`Found post: ${asset.title}`);
-    return mapAssetToPost(asset);
+    return mapAssetToPost(asset, imageSubfolder);
   } catch (error) {
     console.error(`Error fetching post by slug ${slug}:`, error);
     return null;
   }
 }
 
-export async function getAllPosts(): Promise<Post[]> {
+export async function getAllPosts(imageSubfolder?: string): Promise<Post[]> {
   try {
     console.log('Fetching all posts');
     const db = await withTimeout(getDatabase(), 15000);
@@ -123,7 +127,7 @@ export async function getAllPosts(): Promise<Post[]> {
     ) as AssetPost[];
 
     console.log(`Found ${assets.length} posts`);
-    return assets.map(mapAssetToPost);
+    return assets.map(asset => mapAssetToPost(asset, imageSubfolder));
   } catch (error) {
     console.error('Error fetching all posts:', error);
     return [];

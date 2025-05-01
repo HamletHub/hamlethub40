@@ -107,6 +107,7 @@ export async function getAllPosts(): Promise<Post[]> {
       publishAt: 1,
       imageUrl: 1,
       metaDescription: 1,
+      description: 1,
       hubId: 1
     };
     

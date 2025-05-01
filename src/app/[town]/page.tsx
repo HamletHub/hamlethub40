@@ -1,5 +1,6 @@
 import Container from "@/app/_components/container";
 import { MoreStories } from "@/app/_components/more-stories";
+import TownHeader from "@/app/_components/TownHeader";
 import { getDatabase } from "@/lib/mongodb";
 import { Post } from "@/interfaces/post";
 // @ts-ignore
@@ -32,7 +33,7 @@ interface AssetPost {
 // Define type for MongoDB hubs
 interface Hub {
   _id: string;
-  name: string;
+  title: string;
   alias: string;
   state: string;
 }
@@ -61,8 +62,8 @@ export async function generateMetadata({ params }: PageParams) {
     }
 
     return {
-      title: `${hub.name} Stories | HamletHub`,
-      description: `Latest stories from ${hub.name}`
+      title: `${hub.title} Stories | HamletHub`,
+      description: `Latest stories from ${hub.title}`
     };
   } catch (error) {
     console.error('Error generating metadata:', error);
@@ -89,7 +90,7 @@ export default async function TownPage({ params }: PageParams) {
       return notFound();
     }
 
-    console.log(`Found hub: ${hub.name} with id: ${hub._id}`);
+    console.log(`Found hub: ${hub.title} with id: ${hub._id}`);
     
     // Now fetch stories for this hub using its ID
     const assetPosts = await db.collection('assets').find({
@@ -106,7 +107,7 @@ export default async function TownPage({ params }: PageParams) {
     .limit(10)
     .toArray() as AssetPost[];
     
-    console.log(`Found ${assetPosts.length} stories for ${hub.name}`);
+    console.log(`Found ${assetPosts.length} stories for ${hub.title}`);
     
     // Map to required format
     const allPosts = assetPosts.map((post: AssetPost) => ({
@@ -125,14 +126,23 @@ export default async function TownPage({ params }: PageParams) {
     return (
       <main>
         <Container>
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tighter leading-tight md:pr-8 mb-8">
-            {hub.name}
-          </h1>
-          {allPosts.length > 0 ? (
-            <MoreStories posts={allPosts} />
-          ) : (
-            <p>No stories found for {hub.name}.</p>
-          )}
+          <div className="flex flex-col md:flex-row gap-6">
+            <div className="flex-1">
+              <TownHeader hubTitle={hub.title} />
+              <h2 className="mb-6 text-3xl md:text-4xl leading-tight font-vollkorn text-green-medium">
+                Stories
+              </h2>
+
+              {allPosts.length > 0 ? (
+                <MoreStories posts={allPosts} />
+              ) : (
+                <p>No stories found for {hub.title}.</p>
+              )}
+            </div>
+            <div className="w-[300px] shrink-0 px-[15px]">
+              {/* Right column content goes here */}
+            </div>
+          </div>
         </Container>
       </main>
     );
@@ -141,10 +151,15 @@ export default async function TownPage({ params }: PageParams) {
     return (
       <main>
         <Container>
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tighter leading-tight md:pr-8 mb-8">
-            Town Stories
-          </h1>
-          <p>Error loading posts. Please try again later.</p>
+          <div className="flex flex-col md:flex-row gap-6">
+            <div className="flex-1">
+              <TownHeader hubTitle="Town Stories" />
+              <p>Error loading posts. Please try again later.</p>
+            </div>
+            <div className="w-[300px] shrink-0 px-[15px]">
+              {/* Right column content goes here */}
+            </div>
+          </div>
         </Container>
       </main>
     );

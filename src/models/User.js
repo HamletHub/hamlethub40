@@ -1,18 +1,13 @@
 import { getCollection } from '@/lib/mongodb'; // Adjust this import to your actual utility path
 
-export async function findUserByUsername(username) {
+export async function findUserByEmail(email) {
   const collection = await getCollection('users');
-  return collection.findOne({ username });
+  return collection.findOne({ email: email.toLowerCase() });
 }
 
 export async function createUser(userData) {
   const collection = await getCollection('users');
   return collection.insertOne(userData);
-}
-
-export async function validateUser({ username, password }) {
-  const collection = await getCollection('users');
-  return collection.findOne({ username, password });
 }
 
 export const userRoles = {

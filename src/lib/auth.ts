@@ -40,19 +40,7 @@ export const authOptions: NextAuthOptions = {
             return null;
           }
 
-          // If using plain text passwords (for development only)
-          if (credentials.password === user.password) {
-            return {
-              id: user._id.toString(),
-              name: user.name || user.email,
-              email: user.email,
-              role: user.role || 'user',
-            };
-          }
-
-          // If using hashed passwords (recommended for production)
-          // Uncomment when needed:
-          /*
+          // Verify password using bcrypt
           const isValid = await bcrypt.compare(
             credentials.password,
             user.password
@@ -61,7 +49,6 @@ export const authOptions: NextAuthOptions = {
           if (!isValid) {
             return null;
           }
-          */
 
           return {
             id: user._id.toString(),
@@ -83,14 +70,14 @@ export const authOptions: NextAuthOptions = {
     signIn: '/login',
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: any; user?: any }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: any; token: any }) {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;

@@ -4,7 +4,6 @@ import TownHeader from "@/app/_components/TownHeader";
 import { getDatabase } from "@/lib/mongodb";
 import { Post } from "@/interfaces/post";
 import { convertToGcsUrl } from "@/lib/imageUtils";
-// @ts-ignore
 import { notFound } from "next/navigation";
 
 // Define type for MongoDB assets
@@ -102,7 +101,7 @@ export default async function TownPage({ params }: PageParams) {
     .sort({ publishAt: -1 })
     .limit(10)
     .toArray() as AssetPost[];
-        
+
     console.log(`Found ${assetPosts.length} stories for ${hub.title}`);
     
     // Map to required format with 1_1 subfolder for town page images

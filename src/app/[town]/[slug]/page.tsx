@@ -1,6 +1,4 @@
-// @ts-ignore
 import { Metadata } from "next";
-// @ts-ignore
 import { notFound } from "next/navigation";
 import { getDatabase } from "@/lib/mongodb";
 import Container from "@/app/_components/container";
@@ -62,12 +60,7 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
       alias: slug,
       type: "story",
       state: "published",
-      $expr: { 
-        $eq: [
-          { $toString: "$hubId" }, 
-          { $toString: hub._id }
-        ]
-      }
+      hubId: hub._id
     }) as AssetPost;
 
     if (!post) {
@@ -118,12 +111,7 @@ export default async function StoryPage({ params }: PageParams) {
       alias: slug,
       type: "story",
       state: "published",
-      $expr: { 
-        $eq: [
-          { $toString: "$hubId" }, 
-          { $toString: hub._id }
-        ]
-      }
+      hubId: hub._id
     }) as AssetPost;
 
     if (!post) {
@@ -176,4 +164,4 @@ export default async function StoryPage({ params }: PageParams) {
       </main>
     );
   }
-} 
+}

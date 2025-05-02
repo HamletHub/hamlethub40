@@ -97,17 +97,12 @@ export default async function TownPage({ params }: PageParams) {
     const assetPosts = await db.collection('assets').find({
       type: "story",
       state: "published",
-      $expr: { 
-        $eq: [
-          { $toString: "$hubId" }, 
-          { $toString: hub._id }
-        ]
-      }
+      hubId: hub._id
     })
     .sort({ publishAt: -1 })
     .limit(10)
     .toArray() as AssetPost[];
-    
+        
     console.log(`Found ${assetPosts.length} stories for ${hub.title}`);
     
     // Map to required format with 1_1 subfolder for town page images

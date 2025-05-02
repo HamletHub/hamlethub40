@@ -1,19 +1,19 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { createAssetStory } from '@/lib/actions';
+import { createAssetStory, updateAssetStory } from '@/lib/actions';
 import ImageUploader from './ImageUploader';
 import SearchableTownDropdown from './SearchableTownDropdown';
 
-export default function EditorForm() {
+export default function EditorForm({ storyData, isEditing = false }) {
   const [loading, setLoading] = useState(false);
   const [showImageUploader, setShowImageUploader] = useState(false);
   const [uploadedImages, setUploadedImages] = useState({
-    original: '',
+    original: storyData?.imageUrl || '',
     square: '',
     wide: ''
   });
-  const [selectedTown, setSelectedTown] = useState(null);
+  const [selectedTown, setSelectedTown] = useState(storyData?.town || null);
 
   const handleImagesUploaded = (imageUrls) => {
     setUploadedImages(imageUrls);
@@ -24,8 +24,14 @@ export default function EditorForm() {
     setSelectedTown(town);
   };
 
+  // Use the appropriate action based on whether we're editing or creating
+  const formAction = isEditing ? updateAssetStory : createAssetStory;
+
   return (
-    <form action={createAssetStory} className="space-y-4">
+    <form action={formAction} className="space-y-4">
+      {/* If editing, include the story ID as a hidden field */}
+      {isEditing && <input type="hidden" name="storyId" value={storyData.id} />}
+      
       <div className="flex flex-col">
         <label htmlFor="title" className="mb-1 font-medium">Title</label>
         <input 
@@ -34,6 +40,7 @@ export default function EditorForm() {
           name="title" 
           required 
           className="border rounded p-2"
+          defaultValue={storyData?.title || ''}
         />
       </div>
       
@@ -45,6 +52,7 @@ export default function EditorForm() {
           rows="10" 
           required
           className="border rounded p-2"
+          defaultValue={storyData?.description || ''}
         ></textarea>
       </div>
       
@@ -55,6 +63,7 @@ export default function EditorForm() {
           id="metadescription" 
           name="metadescription"
           className="border rounded p-2"
+          defaultValue={storyData?.metadescription || ''}
         />
       </div>
       
@@ -80,7 +89,7 @@ export default function EditorForm() {
                     <div>
                       <p className="text-xs mb-1">Square (1:1)</p>
                       <img 
-                        src={uploadedImages.square} 
+                        src={uploadedImages.square || storyData?.imageUrl} 
                         alt="Square crop" 
                         className="border rounded max-h-32"
                       />
@@ -88,7 +97,7 @@ export default function EditorForm() {
                     <div>
                       <p className="text-xs mb-1">Wide (1.9:1)</p>
                       <img 
-                        src={uploadedImages.wide} 
+                        src={uploadedImages.wide || storyData?.imageUrl} 
                         alt="Wide crop" 
                         className="border rounded max-h-32"
                       />
@@ -124,7 +133,7 @@ export default function EditorForm() {
       
       <div className="flex flex-col">
         <label htmlFor="town" className="mb-1 font-medium">Town</label>
-        <SearchableTownDropdown onSelect={handleTownSelect} />
+        <SearchableTownDropdown onSelect={handleTownSelect} initialTown={storyData?.town} />
         {selectedTown && (
           <p className="text-sm text-gray-500 mt-1">Selected: {selectedTown.title}</p>
         )}
@@ -134,7 +143,7 @@ export default function EditorForm() {
         type="submit"
         className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded"
       >
-        Submit Story
+        {isEditing ? 'Update Story' : 'Submit Story'}
       </button>
     </form>
   );

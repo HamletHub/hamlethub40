@@ -2,46 +2,60 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 
-export default function SearchableTownDropdown({ onSelect }) {
+export default function SearchableTownDropdown({ onSelect, initialTown = null }) {
+  const [searchText, setSearchText] = useState('');
   const [towns, setTowns] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedTown, setSelectedTown] = useState(null);
+  const [filteredTowns, setFilteredTowns] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedTown, setSelectedTown] = useState(initialTown);
+  const [isLoading, setIsLoading] = useState(false);
   const dropdownRef = useRef(null);
+  const didInitialSelectRef = useRef(false); // Track if we've already done initial selection
 
-  // Fetch towns from the database
+  // Load towns when component mounts
   useEffect(() => {
-    async function fetchTowns() {
+    const loadTowns = async () => {
+      setIsLoading(true);
       try {
-        console.log('Fetching towns from API...');
         const response = await fetch('/api/towns');
         const data = await response.json();
         
-        if (data.success && data.towns) {
-          console.log('Towns fetched successfully:', data.towns.length);
+        if (data.towns) {
           setTowns(data.towns);
-        } else {
-          console.error('Failed to load towns from API:', data);
-          setError('Failed to load towns');
+          setFilteredTowns(data.towns);
         }
       } catch (error) {
-        console.error('Error fetching towns:', error);
-        setError('Failed to load towns');
+        console.error('Error loading towns:', error);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
+      }
+    };
+    
+    loadTowns();
+  }, []);
+
+  // If initialTown is provided, set it when towns are loaded (only once)
+  useEffect(() => {
+    if (initialTown && towns.length > 0 && !didInitialSelectRef.current) {
+      // Find the town in the loaded towns list
+      const town = towns.find(t => t._id === initialTown.id);
+      if (town) {
+        setSelectedTown({ id: town._id, title: town.title });
+        // Set the search text to match the town name
+        setSearchText(town.title);
+        // Mark that we've processed the initial selection
+        didInitialSelectRef.current = true;
+        // Also call onSelect to notify parent component
+        onSelect({ id: town._id, title: town.title });
       }
     }
-
-    fetchTowns();
-  }, []);
+  }, [initialTown, towns, onSelect]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false);
+        setShowDropdown(false);
       }
     }
 
@@ -52,15 +66,27 @@ export default function SearchableTownDropdown({ onSelect }) {
   }, []);
 
   // Filter towns based on search term
-  const filteredTowns = towns.filter(town => 
-    town.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleSearch = (e) => {
+    const term = e.target.value.toLowerCase();
+    
+    // Only show dropdown and filter if text is actually changing
+    if (term !== searchText.toLowerCase()) {
+      setSearchText(term);
+      setShowDropdown(true);
+      setFilteredTowns(towns.filter(town => 
+        town.title.toLowerCase().includes(term)
+      ));
+    } else {
+      // Just update the text without toggling dropdown
+      setSearchText(term);
+    }
+  };
 
   const handleSelectTown = (town) => {
     console.log('Town selected:', town);
     setSelectedTown(town);
-    setSearchTerm(town.title);
-    setIsOpen(false);
+    setSearchText(town.title);
+    setShowDropdown(false);
     onSelect(town);
   };
 
@@ -70,27 +96,22 @@ export default function SearchableTownDropdown({ onSelect }) {
         type="text"
         className="w-full border rounded p-2"
         placeholder="Search for a town..."
-        value={searchTerm}
-        onChange={(e) => {
-          setSearchTerm(e.target.value);
-          setIsOpen(true);
-        }}
-        onClick={() => setIsOpen(true)}
+        value={searchText}
+        onChange={handleSearch}
+        onClick={() => setShowDropdown(true)}
       />
       
       {/* Hidden input to store the town ID as a string */}
       <input 
         type="hidden" 
         name="townId" 
-        value={selectedTown ? selectedTown._id : ''} 
+        value={selectedTown ? selectedTown.id : ''} 
       />
       
-      {isOpen && (
+      {showDropdown && (
         <div className="absolute z-10 w-full mt-1 bg-white border rounded shadow-lg max-h-60 overflow-y-auto">
-          {loading ? (
+          {isLoading ? (
             <div className="p-2 text-gray-500">Loading towns...</div>
-          ) : error ? (
-            <div className="p-2 text-red-500">{error}</div>
           ) : filteredTowns.length === 0 ? (
             <div className="p-2 text-gray-500">No towns found</div>
           ) : (

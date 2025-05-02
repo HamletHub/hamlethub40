@@ -6,6 +6,9 @@ import { PostHeader } from "@/app/_components/post-header";
 import { PostBody } from "@/app/_components/post-body";
 import TownHeader from "@/app/_components/TownHeader";
 import { convertToGcsUrl } from "@/lib/imageUtils";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+import Link from "next/link";
 
 // Define type for MongoDB assets/posts
 interface AssetPost {
@@ -97,6 +100,15 @@ export default async function StoryPage({ params }: PageParams) {
     const resolvedParams = await params;
     const { town, slug } = resolvedParams;
 
+    // Check if the slug appears to be an image file
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.avif'];
+    const hasImageExtension = imageExtensions.some(ext => slug.toLowerCase().endsWith(ext));
+    
+    if (hasImageExtension) {
+      console.log(`Image file detected in slug: ${slug}`);
+      return notFound();
+    }
+
     const db = await getDatabase();
 
     // First verify the town exists
@@ -119,6 +131,10 @@ export default async function StoryPage({ params }: PageParams) {
       return notFound();
     }
 
+    // Check if user is logged in (for Edit button)
+    const session = await getServerSession(authOptions);
+    const isLoggedIn = !!session?.user;
+
     // Convert image URL to use original subfolder
     const imageUrl = post.imageUrl ? convertToGcsUrl(post.imageUrl, "original") : '';
 
@@ -135,6 +151,16 @@ export default async function StoryPage({ params }: PageParams) {
         <Container>
           <TownHeader hubTitle={hub.title} />
           <article className="mb-32">
+            {isLoggedIn && (
+              <div className="flex justify-end mb-4">
+                <Link 
+                  href={`/editor/${post._id}`}
+                  className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded text-sm"
+                >
+                  Edit Story
+                </Link>
+              </div>
+            )}
             <PostHeader
               title={formattedPost.title}
               coverImage={formattedPost.coverImage}

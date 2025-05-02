@@ -167,3 +167,78 @@ export async function createAssetStory(formData) {
     throw new Error('Failed to create story. Please try again.');
   }
 }
+
+export async function updateAssetStory(formData) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      throw new Error('You must be logged in to edit a story');
+    }
+
+    const storyId = formData.get('storyId');
+    const title = formData.get('title');
+    const description = formData.get('description');
+    const metadescription = formData.get('metadescription');
+    const townId = formData.get('townId');
+    const originalImage = formData.get('originalImage');
+    const squareImage = formData.get('squareImage');
+    const wideImage = formData.get('wideImage');
+    
+    if (!storyId || !title || !description) {
+      throw new Error('Story ID, title and description are required');
+    }
+    
+    const db = await getDatabase();
+    if (!db) {
+      throw new Error('Failed to connect to database');
+    }
+    
+    // Convert storyId to ObjectId
+    const objectId = new ObjectId(storyId);
+    
+    // Create the update object with only fields that are provided
+    const updateData = {
+      title: title,
+      description: description
+    };
+    
+    // Add optional fields if they are provided
+    if (metadescription) updateData.metaDescription = metadescription;
+    if (originalImage) updateData.imageUrl = originalImage.split('/').pop();
+    
+    // Update the story
+    const result = await db.collection('assets').updateOne(
+      { _id: objectId },
+      { $set: updateData }
+    );
+    
+    if (result.matchedCount === 0) {
+      throw new Error('Story not found');
+    }
+    
+    // Get the town slug for the redirect
+    const story = await db.collection('assets').findOne({ _id: objectId });
+    if (!story) {
+      throw new Error('Failed to retrieve the updated story');
+    }
+    
+    // Get the hub to get the slug
+    const hub = await db.collection('hubs').findOne({ _id: story.hubId });
+    const townSlug = hub?.slug || 'ridgefield-connecticut'; // Default
+    
+    // Revalidate the path
+    revalidatePath(`/${townSlug}/${story.alias}`);
+    
+    // Redirect to the updated story
+    redirect(`/${townSlug}/${story.alias}`);
+  } catch (error) {
+    console.error('Error updating story:', error);
+    
+    // Don't treat redirects as errors
+    if (error.message === 'NEXT_REDIRECT') {
+      throw error; // Re-throw the redirect to let Next.js handle it
+    }
+    
+    throw new Error('Failed to update story. Please try again.');
+  }
+}

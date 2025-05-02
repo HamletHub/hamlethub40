@@ -5,7 +5,14 @@ import { ObjectId } from 'mongodb';
 import { notFound } from 'next/navigation';
 import EditorForm from '@/app/_components/EditorForm';
 
-export default async function EditStoryPage({ params }) {
+// Define params interface for the edit page
+interface EditorPageParams {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+export default async function EditStoryPage({ params }: EditorPageParams) {
   // Check if the user is logged in
   const session = await getServerSession(authOptions);
   if (!session || !session.user) {

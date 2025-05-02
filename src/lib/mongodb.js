@@ -37,3 +37,10 @@ export async function getCollection(collectionName) {
   const db = await getDatabase();
   return db.collection(collectionName);
 }
+
+// Add connectToDatabase function for API routes
+export async function connectToDatabase() {
+  const client = await clientPromise;
+  const db = client.db();
+  return { client, db };
+}

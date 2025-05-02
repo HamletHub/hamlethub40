@@ -3,11 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { createAssetStory } from '@/lib/actions';
 import ImageUploader from './ImageUploader';
+import SearchableTownDropdown from './SearchableTownDropdown';
 
 export default function EditorForm() {
-  const [towns, setTowns] = useState([
-    { name: 'Ridgefield', slug: 'ridgefield-connecticut' }
-  ]);
   const [loading, setLoading] = useState(false);
   const [showImageUploader, setShowImageUploader] = useState(false);
   const [uploadedImages, setUploadedImages] = useState({
@@ -15,32 +13,15 @@ export default function EditorForm() {
     square: '',
     wide: ''
   });
-
-  useEffect(() => {
-    async function fetchTowns() {
-      try {
-        const response = await fetch('/api/page-debug');
-        const data = await response.json();
-        if (data.success && data.towns) {
-          setTowns(data.towns.map(town => ({
-            name: town.town,
-            slug: town.townSlug
-          })));
-        }
-      } catch (error) {
-        console.error('Error fetching towns:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    setLoading(true);
-    fetchTowns();
-  }, []);
+  const [selectedTown, setSelectedTown] = useState(null);
 
   const handleImagesUploaded = (imageUrls) => {
     setUploadedImages(imageUrls);
     setShowImageUploader(false);
+  };
+
+  const handleTownSelect = (town) => {
+    setSelectedTown(town);
   };
 
   return (
@@ -143,22 +124,10 @@ export default function EditorForm() {
       
       <div className="flex flex-col">
         <label htmlFor="town" className="mb-1 font-medium">Town</label>
-        <select 
-          id="town" 
-          name="town" 
-          required
-          className="border rounded p-2"
-        >
-          {loading ? (
-            <option value="">Loading towns...</option>
-          ) : (
-            towns.map(town => (
-              <option key={town.slug} value={town.slug}>
-                {town.name}
-              </option>
-            ))
-          )}
-        </select>
+        <SearchableTownDropdown onSelect={handleTownSelect} />
+        {selectedTown && (
+          <p className="text-sm text-gray-500 mt-1">Selected: {selectedTown.title}</p>
+        )}
       </div>
       
       <button 

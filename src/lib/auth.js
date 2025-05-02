@@ -25,8 +25,18 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    async session({ session, user }) {
-      session.user.role = user.role;
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = user.role;
+        token.id = user.id;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token) {
+        session.user.id = token.id;
+        session.user.role = token.role;
+      }
       return session;
     },
   },

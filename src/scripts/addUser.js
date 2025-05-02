@@ -35,9 +35,9 @@ async function addOrUpdateUser() {
     if (existingUser) {
       console.log(`User with email ${userEmail} found. Updating with password and role...`);
       
-      // For production, use hashed password:
-      // const salt = await bcrypt.genSalt(10);
-      // updates.password = await bcrypt.hash(updates.password, salt);
+      // Hash the password before storing
+      const salt = await bcrypt.genSalt(10);
+      updates.password = await bcrypt.hash(updates.password, salt);
       
       // Update the existing user
       const result = await db.collection('users').updateOne(
@@ -49,12 +49,16 @@ async function addOrUpdateUser() {
     } else {
       console.log(`No user found with email ${userEmail}. Creating new user...`);
       
+      // Hash the password before storing
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(updates.password, salt);
+      
       // Create a new user according to your document structure
       const newUser = {
         email: userEmail,
         firstName: '',
         lastName: '',
-        password: updates.password, // Plain text for development
+        password: hashedPassword,
         role: updates.role,
         userType: { role: updates.role },
         createdAt: new Date(),

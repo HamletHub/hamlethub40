@@ -1,14 +1,15 @@
 import Footer from "@/app/_components/footer";
-import { CMS_NAME, HOME_OG_IMAGE_URL } from "@/lib/constants";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import cn from "classnames";
 import { Vollkorn } from 'next/font/google';
 
-
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
+
+// Use environment variable with fallback
+const HOME_OG_IMAGE_URL = process.env.NEXT_PUBLIC_HOME_OG_IMAGE_URL || "/images/og-image.jpg";
 
 export const metadata: Metadata = {
   title: `HamletHub Local Stories`,
@@ -69,7 +70,11 @@ export default function RootLayout({
       <body
         className={cn(inter.className, "dark:bg-slate-900 dark:text-slate-400")}
       >
-        <div className="min-h-screen">{children}</div>
+        <div className="min-h-screen">
+          <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
+            {children}
+          </div>
+        </div>
         <Footer />
       </body>
     </html>

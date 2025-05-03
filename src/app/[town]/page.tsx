@@ -5,6 +5,7 @@ import { getDatabase } from "@/lib/mongodb";
 import { Post } from "@/interfaces/post";
 import { convertToGcsUrl } from "@/lib/imageUtils";
 import { notFound } from "next/navigation";
+import GoogleAd from "@/app/_components/GoogleAd";
 
 // Define type for MongoDB assets
 interface AssetPost {
@@ -118,9 +119,20 @@ export default async function TownPage({ params }: PageParams) {
       townSlug: townSlug
     })) as Post[];
 
+    // Use the townSlug directly without any suffix
+    const adAlias = townSlug;
+
     return (
       <main>
         <Container>
+          {/* Leaderboard Ad - Town specific leaderboard */}
+          <div className="w-full my-4">
+            <GoogleAd 
+              alias={adAlias} 
+              size="970x90"
+            />
+          </div>
+
           <div className="flex flex-col md:flex-row gap-6">
             <div className="flex-1">
               <TownHeader hubTitle={hub.title} />
@@ -146,6 +158,14 @@ export default async function TownPage({ params }: PageParams) {
     return (
       <main>
         <Container>
+          {/* Leaderboard Ad - even in error state */}
+          <div className="w-full my-4">
+            <GoogleAd 
+              alias="general" 
+              size="970x90"
+            />
+          </div>
+
           <div className="flex flex-col md:flex-row gap-6">
             <div className="flex-1">
               <TownHeader hubTitle="Town Stories" />

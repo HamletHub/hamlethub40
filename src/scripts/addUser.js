@@ -12,11 +12,11 @@ if (!uri) {
 
 async function addOrUpdateUser() {
   // User details - change to match the user you want to update
-  const userEmail = 'accounting@hamlethub.com'; // Change this to the user's email
+  const userEmail = 'kerry@hamlethub.com'; // Change this to the user's email
   
   // New user fields to add/update
   const updates = {
-    password: 'Planes22', // Change this to your desired password
+    password: 'notontherecord22!', // Change this to your desired password
     role: 'admin', // Add a role field
     updatedAt: new Date()
   };

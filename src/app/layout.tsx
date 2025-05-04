@@ -7,7 +7,10 @@ import { Lexend_Deca } from 'next/font/google';
 
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ 
+  subsets: ["latin"],
+  variable: '--font-inter', // Add variable property for CSS variable
+});
 
 // Use environment variable with fallback
 const HOME_OG_IMAGE_URL = process.env.NEXT_PUBLIC_HOME_OG_IMAGE_URL || "/images/og-image.jpg";

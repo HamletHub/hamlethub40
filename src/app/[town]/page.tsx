@@ -51,10 +51,10 @@ export async function generateMetadata({ params }: PageParams) {
     // Await params before accessing properties
     const resolvedParams = await params;
     const townSlug = resolvedParams.town;
-    
+
     const db = await getDatabase();
     const hub = await db.collection("hubs").findOne({ alias: townSlug }) as Hub;
-    
+
     if (!hub) {
       return {
         title: 'Town Not Found | HamletHub',
@@ -80,31 +80,31 @@ export default async function TownPage({ params }: PageParams) {
     // Await params before accessing properties
     const resolvedParams = await params;
     const townSlug = resolvedParams.town;
-    
+
     const db = await getDatabase();
-    
+
     // Find the hub information by matching the alias to the town slug
     const hub = await db.collection("hubs").findOne({ alias: townSlug }) as Hub;
-    
+
     if (!hub) {
       console.error(`No hub found with alias: ${townSlug}`);
       return notFound();
     }
 
     console.log(`Found hub: ${hub.title} with id: ${hub._id}`);
-    
+
     // Now fetch stories for this hub using its ID
     const assetPosts = await db.collection('assets').find({
       type: "story",
       state: "published",
       hubId: hub._id
     })
-    .sort({ publishAt: -1 })
-    .limit(10)
-    .toArray() as AssetPost[];
+      .sort({ publishAt: -1 })
+      .limit(10)
+      .toArray() as AssetPost[];
 
     console.log(`Found ${assetPosts.length} stories for ${hub.title}`);
-    
+
     // Map to required format with 1_1 subfolder for town page images
     const allPosts = assetPosts.map((post: AssetPost) => ({
       slug: post.alias || '',
@@ -125,17 +125,11 @@ export default async function TownPage({ params }: PageParams) {
     return (
       <main>
         <Container>
-          {/* Leaderboard Ad - Town specific leaderboard */}
-          <div className="w-full my-4">
-            <GoogleAd 
-              alias={adAlias} 
-              size="970x90"
-            />
-          </div>
+          {/* TownHeader at full width */}
+          <TownHeader hubTitle={hub.title} />
 
           <div className="flex flex-col md:flex-row gap-6">
             <div className="flex-1">
-              <TownHeader hubTitle={hub.title} />
               <h2 className="mb-6 text-3xl md:text-4xl leading-tight font-vollkorn text-green-medium">
                 Stories
               </h2>
@@ -146,10 +140,22 @@ export default async function TownPage({ params }: PageParams) {
                 <p>No stories found for {hub.title}.</p>
               )}
             </div>
-            <div className="w-[300px] shrink-0 px-[15px]">
-              {/* Right column content goes here */}
+            <div className="w-full md:w-[330px] px-[15px] bg-white">
+              <div className="mt-4">
+                <GoogleAd 
+                  alias={adAlias}
+                  size="300x250"
+                />
+              </div>
             </div>
           </div>
+          <div className="w-full my-4">
+            <GoogleAd
+              alias={adAlias}
+              size="970x90"
+            />
+          </div>
+
         </Container>
       </main>
     );
@@ -158,21 +164,30 @@ export default async function TownPage({ params }: PageParams) {
     return (
       <main>
         <Container>
+          {/* TownHeader at full width */}
+          <TownHeader hubTitle="Town Stories" />
+
           {/* Leaderboard Ad - even in error state */}
           <div className="w-full my-4">
-            <GoogleAd 
-              alias="general" 
+            <GoogleAd
+              alias="general"
               size="970x90"
             />
           </div>
 
           <div className="flex flex-col md:flex-row gap-6">
             <div className="flex-1">
-              <TownHeader hubTitle="Town Stories" />
               <p>Error loading posts. Please try again later.</p>
             </div>
-            <div className="w-[300px] shrink-0 px-[15px]">
-              {/* Right column content goes here */}
+            <div className="w-full md:w-[300px] px-[15px] bg-white">
+              <h2 className="text-xl font-semibold">Right Column</h2>
+              <p>Content for the right column, 300px wide with 15px padding on both sides.</p>
+              <div className="mt-4">
+                <GoogleAd 
+                  alias="general"
+                  size="300x250"
+                />
+              </div>
             </div>
           </div>
         </Container>

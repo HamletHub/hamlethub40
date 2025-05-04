@@ -10,10 +10,10 @@ import DateFormatter from "./date-formatter";
 const truncateText = (text: string | undefined, maxLength: number): string => {
   // Handle undefined or empty text
   if (!text || text.length === 0) return '';
-  
+
   // First remove HTML tags
   let plainText = text.replace(/<[^>]*>/g, '');
-  
+
   // Decode common HTML entities
   plainText = plainText
     .replace(/&nbsp;/g, ' ')
@@ -29,15 +29,15 @@ const truncateText = (text: string | undefined, maxLength: number): string => {
     .replace(/&lsquo;/g, "'")
     .replace(/&rdquo;/g, '"')
     .replace(/&ldquo;/g, '"');
-  
+
   if (plainText.length <= maxLength) return plainText;
-  
+
   // Find the last space before maxLength
   const lastSpaceIndex = plainText.substring(0, maxLength).lastIndexOf(' ');
-  
+
   // If no space found, cut at maxLength
   if (lastSpaceIndex === -1) return plainText.substring(0, maxLength) + '...';
-  
+
   // Cut at the last space and add ellipsis
   return plainText.substring(0, lastSpaceIndex) + '...';
 };
@@ -68,27 +68,28 @@ export function PostPreview({
   return (
     <div>
       <div className="mb-5">
-        <CoverImage 
-          slug={slug} 
-          title={title} 
-          src={coverImage} 
-          townSlug={townSlug} 
+        <CoverImage
+          slug={slug}
+          title={title}
+          src={coverImage}
+          townSlug={townSlug}
           imageSubfolder={imageSubfolder}
         />
       </div>
-      <h3 className="text-3xl mb-3 leading-snug">
-        <Link 
-          href={`/${townSlug}/${slug}`} 
+      <div className="text-sm text-greyblue-light mb-1">
+        <DateFormatter dateString={date} />
+      </div>
+
+      <h3 className="text-2xl font-semibold font-vollkorn mb-2 leading-snug">
+        <Link
+          href={`/${townSlug}/${slug}`}
           className="hover:underline"
           onClick={() => console.log(`Link clicked for ${title} at ${Date.now()}`)}
         >
           {title}
         </Link>
       </h3>
-      <div className="text-lg mb-4">
-        <DateFormatter dateString={date} />
-      </div>
-      <p className="text-lg leading-relaxed mb-4">
+      <p className="text-base font-normal text-greyblue-light leading-relaxed mb-4">
         {truncateText(content || excerpt, 160)}
       </p>
       {/* <Avatar name={author.name} picture={author.picture} /> */}

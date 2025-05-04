@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import cn from "classnames";
 import { Vollkorn } from 'next/font/google';
+import { Lexend_Deca } from 'next/font/google';
 
 import "./globals.css";
 
@@ -26,6 +27,11 @@ const vollkorn = Vollkorn({
   display: 'swap',
 });
 
+const lexendDeca = Lexend_Deca({
+  subsets: ['latin'],
+  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
+  variable: '--font-lexend-deca',
+});
 
 export default function RootLayout({
   children,
@@ -68,7 +74,11 @@ export default function RootLayout({
         <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
       </head>
       <body
-        className={cn(inter.className, "dark:bg-slate-900 dark:text-slate-400")}
+        className={cn(
+          lexendDeca.variable, // Use Lexend Deca as the primary font
+          inter.variable, // Optional: Include Inter as a fallback
+          'font-sans dark:bg-slate-900 dark:text-slate-400'
+        )}
       >
         <div className="min-h-screen">
           <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">

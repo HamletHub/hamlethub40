@@ -23,9 +23,11 @@ const config: Config = {
         "green-medium": "var(--color-green-medium)",
         "green-light": "var(--color-green-light)",
         "green": "var(--color-green)",
+        "greyblue-light": "var(--color-greyblue-light)",
       },
       fontFamily: {
         vollkorn: "var(--font-vollkorn), serif",
+        lexendDeca: "var(--font-lexend-deca), sans-serif",
       },
       spacing: {
         28: "7rem",

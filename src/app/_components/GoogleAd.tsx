@@ -2,17 +2,32 @@
 
 import { useEffect, useRef } from 'react';
 
+// Use a fixed timestamp to avoid hydration mismatches
+const FIXED_TIMESTAMP = 1746391652922;
+
 interface GoogleAdProps {
   alias: string;
   size?: '300x250' | '970x90';
   className?: string;
+  id?: string; // Optional custom ID
 }
 
-export default function GoogleAd({ alias, size = '970x90', className = '' }: GoogleAdProps) {
+export default function GoogleAd({ 
+  alias, 
+  size = '970x90', 
+  className = '',
+  id // Allow custom ID to be passed
+}: GoogleAdProps) {
   const adRef = useRef<HTMLDivElement>(null);
   
   // Create the ad unit ID with account number
-  const adId = `/15251363/${alias}`;
+  const adUnitPath = `/15251363/${alias}`;
+  
+  // Create a deterministic ID based on the alias and size
+  // If custom ID is provided, use it; otherwise create a hash from props
+  const containerId = useRef(
+    id || `div-gpt-ad-${FIXED_TIMESTAMP}-${alias.replace(/[^a-z0-9]/gi, '')}-${size}`
+  );
   
   // Get dimensions
   const dimensions = size === '300x250' 
@@ -38,13 +53,8 @@ export default function GoogleAd({ alias, size = '970x90', className = '' }: Goo
       
       googletag.cmd.push(() => {
         try {
-          // Clear existing slots first
-          if (googletag.pubads && googletag.pubads().clear) {
-            googletag.pubads().clear();
-          }
-          
-          // Define the slot
-          const slot = googletag.defineSlot(adId, [dimensions.width, dimensions.height], adId);
+          // Define the slot using the proper ad unit path and the unique DOM ID
+          const slot = googletag.defineSlot(adUnitPath, [dimensions.width, dimensions.height], containerId.current);
           
           if (!slot) return;
           
@@ -56,9 +66,9 @@ export default function GoogleAd({ alias, size = '970x90', className = '' }: Goo
           googletag.enableServices();
           
           // Display the ad
-          googletag.display(adId);
+          googletag.display(containerId.current);
           
-          // Force refresh to ensure the ad loads
+          // Refresh just this slot
           googletag.pubads().refresh([slot]);
         } catch (err) {
           console.error('Error setting up ad:', err);
@@ -74,14 +84,22 @@ export default function GoogleAd({ alias, size = '970x90', className = '' }: Goo
       if (googletag && googletag.cmd) {
         googletag.cmd.push(() => {
           try {
-            googletag.destroySlots();
+            // Only destroy this specific slot if possible
+            const slots = googletag.pubads().getSlots();
+            const slotToDestroy = slots.find(
+              (s: any) => s.getSlotElementId() === containerId.current
+            );
+            
+            if (slotToDestroy) {
+              googletag.destroySlots([slotToDestroy]);
+            }
           } catch (e) {
             console.error('Error cleaning up ads:', e);
           }
         });
       }
     };
-  }, [adId, dimensions.width, dimensions.height]);
+  }, [adUnitPath, dimensions.width, dimensions.height]);
 
   // Use combined styles from props and base styles
   const combinedClassName = `${className} relative`.trim();
@@ -89,7 +107,7 @@ export default function GoogleAd({ alias, size = '970x90', className = '' }: Goo
   return (
     <div className={combinedClassName}>
       <div 
-        id={adId} 
+        id={containerId.current} 
         ref={adRef}
         style={{ 
           width: dimensions.width,
@@ -97,6 +115,7 @@ export default function GoogleAd({ alias, size = '970x90', className = '' }: Goo
           background: '#f0f0f0'
         }}
         data-adunit={alias}
+        data-size={size}
       />
     </div>
   );

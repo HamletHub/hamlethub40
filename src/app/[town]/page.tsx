@@ -161,6 +161,7 @@ export default async function TownPage({ params }: PageParams) {
     );
   } catch (error) {
     console.error('Error fetching town posts:', error);
+    const adAlias = "general"; // Add fallback ad alias for error state
     return (
       <main>
         <Container>
@@ -170,7 +171,7 @@ export default async function TownPage({ params }: PageParams) {
           {/* Leaderboard Ad - even in error state */}
           <div className="w-full my-4">
             <GoogleAd
-              alias="general"
+              alias={adAlias}
               size="970x90"
             />
           </div>
@@ -179,12 +180,10 @@ export default async function TownPage({ params }: PageParams) {
             <div className="flex-1">
               <p>Error loading posts. Please try again later.</p>
             </div>
-            <div className="w-full md:w-[300px] px-[15px] bg-white">
-              <h2 className="text-xl font-semibold">Right Column</h2>
-              <p>Content for the right column, 300px wide with 15px padding on both sides.</p>
+            <div className="w-full md:w-[330px] px-[15px] bg-white">
               <div className="mt-4">
                 <GoogleAd 
-                  alias="general"
+                  alias={adAlias}
                   size="300x250"
                 />
               </div>

@@ -11,7 +11,7 @@ export function PostBody({ content, imageSubfolder }: Props) {
   const processedContent = processHtmlContent(content, imageSubfolder);
   
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto text-base font-normal">
       <div
         className={markdownStyles["markdown"]}
         dangerouslySetInnerHTML={{ __html: processedContent }}

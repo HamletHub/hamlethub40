@@ -9,6 +9,7 @@ import { convertToGcsUrl } from "@/lib/imageUtils";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import Link from "next/link";
+import GoogleAd from "@/app/_components/GoogleAd";
 
 // Define type for MongoDB assets/posts
 interface AssetPost {
@@ -45,12 +46,12 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
   try {
     // Await params before accessing properties
     const resolvedParams = await params;
-    const { town, slug } = resolvedParams;
+    const { town: townAlias, slug } = resolvedParams;
 
     const db = await getDatabase();
 
     // First verify the town exists
-    const hub = await db.collection("hubs").findOne({ alias: town }) as Hub;
+    const hub = await db.collection("hubs").findOne({ alias: townAlias }) as Hub;
     if (!hub) {
       return {
         title: "Town Not Found | HamletHub",
@@ -98,12 +99,12 @@ export default async function StoryPage({ params }: PageParams) {
   try {
     // Await params before accessing properties
     const resolvedParams = await params;
-    const { town, slug } = resolvedParams;
+    const { town: townAlias, slug } = resolvedParams;
 
     // Check if the slug appears to be an image file
     const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.avif'];
     const hasImageExtension = imageExtensions.some(ext => slug.toLowerCase().endsWith(ext));
-    
+
     if (hasImageExtension) {
       console.log(`Image file detected in slug: ${slug}`);
       return notFound();
@@ -112,9 +113,9 @@ export default async function StoryPage({ params }: PageParams) {
     const db = await getDatabase();
 
     // First verify the town exists
-    const hub = await db.collection("hubs").findOne({ alias: town }) as Hub;
+    const hub = await db.collection("hubs").findOne({ alias: townAlias }) as Hub;
     if (!hub) {
-      console.error(`No hub found with alias: ${town}`);
+      console.error(`No hub found with alias: ${townAlias}`);
       return notFound();
     }
 
@@ -127,7 +128,7 @@ export default async function StoryPage({ params }: PageParams) {
     }) as AssetPost;
 
     if (!post) {
-      console.error(`No post found with slug: ${slug} in town: ${town}`);
+      console.error(`No post found with slug: ${slug} in town: ${townAlias}`);
       return notFound();
     }
 
@@ -146,33 +147,49 @@ export default async function StoryPage({ params }: PageParams) {
       content: post.description || ''
     };
 
+    const adAlias = townAlias;
+
     return (
       <main>
         <Container>
           <TownHeader hubTitle={hub.title} />
-          <article className="mb-32">
-            {isLoggedIn && (
-              <div className="flex justify-end mb-4">
-                <Link 
-                  href={`/editor/${post._id}`}
-                  className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded text-sm"
-                >
-                  Edit Story
-                </Link>
+          <div className="flex flex-col md:flex-row gap-6">
+            <div className="flex-1">
+
+              <article className="mb-32">
+                {isLoggedIn && (
+                  <div className="flex justify-end mb-4">
+                    <Link
+                      href={`/editor/${post._id}`}
+                      className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded text-sm"
+                    >
+                      Edit Story
+                    </Link>
+                  </div>
+                )}
+                <PostHeader
+                  title={formattedPost.title}
+                  coverImage={formattedPost.coverImage}
+                  date={formattedPost.date}
+                  author={formattedPost.author}
+                  imageSubfolder="original"
+                />
+                <PostBody
+                  content={formattedPost.content}
+                  imageSubfolder="original"
+                />
+              </article>
+            </div>
+            <div className="w-full md:w-[330px] px-[15px] bg-white">
+              <div className="mt-4">
+                <GoogleAd
+                  alias={adAlias}
+                  size="300x250"
+                />
               </div>
-            )}
-            <PostHeader
-              title={formattedPost.title}
-              coverImage={formattedPost.coverImage}
-              date={formattedPost.date}
-              author={formattedPost.author}
-              imageSubfolder="original"
-            />
-            <PostBody 
-              content={formattedPost.content} 
-              imageSubfolder="original" 
-            />
-          </article>
+            </div>
+          </div>
+
         </Container>
       </main>
     );

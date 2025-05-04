@@ -84,7 +84,6 @@ export function PostPreview({
         <Link
           href={`/${townSlug}/${slug}`}
           className="hover:underline"
-          onClick={() => console.log(`Link clicked for ${title} at ${Date.now()}`)}
         >
           {title}
         </Link>

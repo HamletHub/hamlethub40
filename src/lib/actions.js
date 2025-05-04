@@ -84,10 +84,10 @@ export async function createAssetStory(formData) {
       throw new Error('Failed to connect to database');
     }
     
-    // Create URL-safe alias from title and append a unique 9-digit number
+    // Create URL-safe alias from title and append a timestamp instead of random number
     const baseAlias = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    const uniqueId = Math.floor(100000000 + Math.random() * 900000000); // 9-digit number
-    const alias = `${baseAlias}-${uniqueId}`;
+    const timestamp = Date.now().toString();
+    const alias = `${baseAlias}-${timestamp}`;
     
     // Get the current date in the correct format
     const currentDate = new Date();

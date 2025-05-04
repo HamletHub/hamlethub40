@@ -2,8 +2,6 @@
 
 import { useEffect, useRef } from 'react';
 
-// Counter to create unique ad IDs
-let adCounter = 0;
 // Use a fixed timestamp to avoid hydration mismatches
 const FIXED_TIMESTAMP = 1746391652922;
 
@@ -11,17 +9,25 @@ interface GoogleAdProps {
   alias: string;
   size?: '300x250' | '970x90';
   className?: string;
+  id?: string; // Optional custom ID
 }
 
-export default function GoogleAd({ alias, size = '970x90', className = '' }: GoogleAdProps) {
+export default function GoogleAd({ 
+  alias, 
+  size = '970x90', 
+  className = '',
+  id // Allow custom ID to be passed
+}: GoogleAdProps) {
   const adRef = useRef<HTMLDivElement>(null);
   
   // Create the ad unit ID with account number
   const adUnitPath = `/15251363/${alias}`;
   
-  // Create a unique container ID by incrementing a counter
-  // This ensures each instance has a unique DOM ID
-  const containerId = useRef(`div-gpt-ad-${FIXED_TIMESTAMP}-${adCounter++}`);
+  // Create a deterministic ID based on the alias and size
+  // If custom ID is provided, use it; otherwise create a hash from props
+  const containerId = useRef(
+    id || `div-gpt-ad-${FIXED_TIMESTAMP}-${alias.replace(/[^a-z0-9]/gi, '')}-${size}`
+  );
   
   // Get dimensions
   const dimensions = size === '300x250' 

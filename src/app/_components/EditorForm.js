@@ -45,7 +45,7 @@ export default function EditorForm({ storyData, isEditing = false }) {
       </div>
       
       <div className="flex flex-col">
-        <label htmlFor="description" className="mb-1 font-medium">Content (Markdown)</label>
+        <label htmlFor="description" className="mb-1 font-medium">Story Content</label>
         <textarea 
           id="description" 
           name="description" 
@@ -76,7 +76,7 @@ export default function EditorForm({ storyData, isEditing = false }) {
             <button 
               type="button"
               onClick={() => setShowImageUploader(true)}
-              className="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded"
+              className="bg-green-medium hover:bg-green-dark text-white font-medium py-2 px-4 rounded"
             >
               {uploadedImages.original ? 'Change Image' : 'Upload Image'}
             </button>

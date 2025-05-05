@@ -59,10 +59,28 @@ export default function ImageUploader({ onImageUploaded }: ImageUploaderProps) {
     const { width, height } = e.currentTarget;
     const aspect = isSquare ? 1 : 1.9;
     
+    const crop = centerAspectCrop(width, height, aspect);
+    
     if (isSquare) {
-      setCropSquare(centerAspectCrop(width, height, aspect));
+      setCropSquare(crop);
+      if (crop.width && crop.height && crop.x !== undefined && crop.y !== undefined) {
+        setCompletedCropSquare({
+          x: Math.round(crop.x),
+          y: Math.round(crop.y),
+          width: Math.round(crop.width),
+          height: Math.round(crop.height)
+        });
+      }
     } else {
-      setCropWide(centerAspectCrop(width, height, aspect));
+      setCropWide(crop);
+      if (crop.width && crop.height && crop.x !== undefined && crop.y !== undefined) {
+        setCompletedCropWide({
+          x: Math.round(crop.x),
+          y: Math.round(crop.y),
+          width: Math.round(crop.width),
+          height: Math.round(crop.height)
+        });
+      }
     }
   };
 
@@ -216,38 +234,42 @@ export default function ImageUploader({ onImageUploaded }: ImageUploaderProps) {
       {imgSrc && (
         <div className={styles['crop-container']}>
           <h3>Square Crop (1:1)</h3>
-          <ReactCrop
-            crop={cropSquare}
-            onChange={(c: Crop) => setCropSquare(c)}
-            onComplete={(c: PixelCrop) => setCompletedCropSquare(c)}
-            aspect={1}
-            circularCrop={false}
-          >
-            <img
-              ref={squareImgRef}
-              src={imgSrc}
-              alt="Square crop"
-              style={{ maxHeight: '300px' }}
-              onLoad={(e) => onImageLoad(e, true)}
-            />
-          </ReactCrop>
+          <div className={styles['crop-wrapper']}>
+            <ReactCrop
+              crop={cropSquare}
+              onChange={(c: Crop) => setCropSquare(c)}
+              onComplete={(c: PixelCrop) => setCompletedCropSquare(c)}
+              aspect={1}
+              circularCrop={false}
+            >
+              <img
+                ref={squareImgRef}
+                src={imgSrc}
+                alt="Square crop"
+                style={{ maxHeight: '300px' }}
+                onLoad={(e) => onImageLoad(e, true)}
+              />
+            </ReactCrop>
+          </div>
 
           <h3>Wide Crop (1.9:1)</h3>
-          <ReactCrop
-            crop={cropWide}
-            onChange={(c: Crop) => setCropWide(c)}
-            onComplete={(c: PixelCrop) => setCompletedCropWide(c)}
-            aspect={1.9}
-            circularCrop={false}
-          >
-            <img
-              ref={wideImgRef}
-              src={imgSrc}
-              alt="Wide crop"
-              style={{ maxHeight: '300px' }}
-              onLoad={(e) => onImageLoad(e, false)}
-            />
-          </ReactCrop>
+          <div className={styles['crop-wrapper']}>
+            <ReactCrop
+              crop={cropWide}
+              onChange={(c: Crop) => setCropWide(c)}
+              onComplete={(c: PixelCrop) => setCompletedCropWide(c)}
+              aspect={1.9}
+              circularCrop={false}
+            >
+              <img
+                ref={wideImgRef}
+                src={imgSrc}
+                alt="Wide crop"
+                style={{ maxHeight: '300px' }}
+                onLoad={(e) => onImageLoad(e, false)}
+              />
+            </ReactCrop>
+          </div>
 
           <button 
             onClick={handleUpload} 

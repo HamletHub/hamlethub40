@@ -10,6 +10,18 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import Link from "next/link";
 import GoogleAd from "@/app/_components/GoogleAd";
+import { LRUCache } from "lru-cache";
+
+// Cache configuration
+const hubCache = new LRUCache<string, Hub>({
+  max: 100, // Maximum 100 items
+  ttl: 1000 * 60 * 10, // 10 minutes
+});
+
+const postCache = new LRUCache<string, AssetPost>({
+  max: 500, // Maximum 500 items
+  ttl: 1000 * 60 * 5, // 5 minutes
+});
 
 // Define type for MongoDB assets/posts
 interface AssetPost {
@@ -49,9 +61,21 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
     const { town: townAlias, slug } = resolvedParams;
 
     const db = await getDatabase();
+    
+    // Cache key for hub
+    const hubCacheKey = `hub:${townAlias}`;
+    
+    // Try to get hub from cache
+    let hub = hubCache.get(hubCacheKey);
+    
+    // If not in cache, fetch from database and cache it
+    if (!hub) {
+      hub = await db.collection("hubs").findOne({ alias: townAlias }) as Hub;
+      if (hub) {
+        hubCache.set(hubCacheKey, hub);
+      }
+    }
 
-    // First verify the town exists
-    const hub = await db.collection("hubs").findOne({ alias: townAlias }) as Hub;
     if (!hub) {
       return {
         title: "Town Not Found | HamletHub",
@@ -59,13 +83,25 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
       };
     }
 
-    // Then find the post
-    const post = await db.collection('assets').findOne({
-      alias: slug,
-      type: "story",
-      state: "published",
-      hubId: hub._id
-    }) as AssetPost;
+    // Cache key for post
+    const postCacheKey = `post:${hub._id}:${slug}`;
+    
+    // Try to get post from cache
+    let post = postCache.get(postCacheKey);
+    
+    // If not in cache, fetch from database and cache it
+    if (!post) {
+      post = await db.collection('assets').findOne({
+        alias: slug,
+        type: "story",
+        state: "published",
+        hubId: hub._id
+      }) as AssetPost;
+      
+      if (post) {
+        postCache.set(postCacheKey, post);
+      }
+    }
 
     if (!post) {
       return {
@@ -112,20 +148,44 @@ export default async function StoryPage({ params }: PageParams) {
 
     const db = await getDatabase();
 
-    // First verify the town exists
-    const hub = await db.collection("hubs").findOne({ alias: townAlias }) as Hub;
+    // Cache key for hub
+    const hubCacheKey = `hub:${townAlias}`;
+    
+    // Try to get hub from cache
+    let hub = hubCache.get(hubCacheKey);
+    
+    // If not in cache, fetch from database and cache it
+    if (!hub) {
+      hub = await db.collection("hubs").findOne({ alias: townAlias }) as Hub;
+      if (hub) {
+        hubCache.set(hubCacheKey, hub);
+      }
+    }
+
     if (!hub) {
       console.error(`No hub found with alias: ${townAlias}`);
       return notFound();
     }
 
-    // Then find the post
-    const post = await db.collection('assets').findOne({
-      alias: slug,
-      type: "story",
-      state: "published",
-      hubId: hub._id
-    }) as AssetPost;
+    // Cache key for post
+    const postCacheKey = `post:${hub._id}:${slug}`;
+    
+    // Try to get post from cache
+    let post = postCache.get(postCacheKey);
+    
+    // If not in cache, fetch from database and cache it
+    if (!post) {
+      post = await db.collection('assets').findOne({
+        alias: slug,
+        type: "story",
+        state: "published",
+        hubId: hub._id
+      }) as AssetPost;
+      
+      if (post) {
+        postCache.set(postCacheKey, post);
+      }
+    }
 
     if (!post) {
       console.error(`No post found with slug: ${slug} in town: ${townAlias}`);

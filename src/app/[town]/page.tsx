@@ -4,8 +4,22 @@ import TownHeader from "@/app/_components/TownHeader";
 import { getDatabase } from "@/lib/mongodb";
 import { Post } from "@/interfaces/post";
 import { convertToGcsUrl } from "@/lib/imageUtils";
+// @ts-ignore
 import { notFound } from "next/navigation";
 import GoogleAd from "@/app/_components/GoogleAd";
+// @ts-ignore
+import { LRUCache } from "lru-cache";
+
+// Cache configuration
+const hubCache = new LRUCache<string, Hub>({
+  max: 100, // Maximum 100 items
+  ttl: 1000 * 60 * 10, // 10 minutes
+});
+
+const postsCache = new LRUCache<string, AssetPost[]>({
+  max: 100, // Maximum 100 items
+  ttl: 1000 * 60 * 5, // 5 minutes
+});
 
 // Define type for MongoDB assets
 interface AssetPost {
@@ -53,7 +67,20 @@ export async function generateMetadata({ params }: PageParams) {
     const townSlug = resolvedParams.town;
 
     const db = await getDatabase();
-    const hub = await db.collection("hubs").findOne({ alias: townSlug }) as Hub;
+    
+    // Cache key for hub
+    const hubCacheKey = `hub:${townSlug}`;
+    
+    // Try to get hub from cache
+    let hub = hubCache.get(hubCacheKey);
+    
+    // If not in cache, fetch from database and cache it
+    if (!hub) {
+      hub = await db.collection("hubs").findOne({ alias: townSlug }) as Hub;
+      if (hub) {
+        hubCache.set(hubCacheKey, hub);
+      }
+    }
 
     if (!hub) {
       return {
@@ -83,8 +110,19 @@ export default async function TownPage({ params }: PageParams) {
 
     const db = await getDatabase();
 
-    // Find the hub information by matching the alias to the town slug
-    const hub = await db.collection("hubs").findOne({ alias: townSlug }) as Hub;
+    // Cache key for hub
+    const hubCacheKey = `hub:${townSlug}`;
+    
+    // Try to get hub from cache
+    let hub = hubCache.get(hubCacheKey);
+    
+    // If not in cache, fetch from database and cache it
+    if (!hub) {
+      hub = await db.collection("hubs").findOne({ alias: townSlug }) as Hub;
+      if (hub) {
+        hubCache.set(hubCacheKey, hub);
+      }
+    }
 
     if (!hub) {
       console.error(`No hub found with alias: ${townSlug}`);
@@ -93,15 +131,27 @@ export default async function TownPage({ params }: PageParams) {
 
     console.log(`Found hub: ${hub.title} with id: ${hub._id}`);
 
-    // Now fetch stories for this hub using its ID
-    const assetPosts = await db.collection('assets').find({
-      type: "story",
-      state: "published",
-      hubId: hub._id
-    })
-      .sort({ publishAt: -1 })
-      .limit(10)
-      .toArray() as AssetPost[];
+    // Cache key for posts
+    const postsCacheKey = `posts:${hub._id}`;
+    
+    // Try to get posts from cache
+    let assetPosts = postsCache.get(postsCacheKey);
+    
+    // If not in cache, fetch from database and cache it
+    if (!assetPosts) {
+      assetPosts = await db.collection('assets').find({
+        type: "story",
+        state: "published",
+        hubId: hub._id
+      })
+        .sort({ publishAt: -1 })
+        .limit(10)
+        .toArray() as AssetPost[];
+        
+      if (assetPosts && assetPosts.length > 0) {
+        postsCache.set(postsCacheKey, assetPosts);
+      }
+    }
 
     console.log(`Found ${assetPosts.length} stories for ${hub.title}`);
 

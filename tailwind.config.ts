@@ -21,6 +21,7 @@ const config: Config = {
         cyan: "#79FFE1",
         "green-dark": "var(--color-green-dark)",
         "green-medium": "var(--color-green-medium)",
+        "green-light-dark": "var(--color-green-light-dark)",
         "green-light": "var(--color-green-light)",
         "green": "var(--color-green)",
         "greyblue-light": "var(--color-greyblue-light)",
